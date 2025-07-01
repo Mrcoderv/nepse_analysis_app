@@ -4,6 +4,6 @@ matplotlib
 plotly
 scikit-learn
 prophet
-nepse
 numpy
 requests
+yfinance
