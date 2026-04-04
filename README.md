@@ -1,48 +1,60 @@
-# NEPSE Analyzer Platform
+# NEPSE AI Analyzer Platform
 
-An AI-powered, two-tier fintech platform for analyzing the Nepal Stock Exchange (NEPSE). Features live market data, advanced technical trading signals, persistent portfolio tracking, and sophisticated Gemini AI intelligence for market insights.
+A professional, AI-powered fintech platform for analyzing the Nepal Stock Exchange (NEPSE). Features live market data, advanced technical signals, persistent portfolio tracking, and structural trend analysis with Gemini 1.5 Flash.
 
 ## Architecture
+
 - **Backend**: Node.js + Express
-  - Integrates `@rumess/nepse-api` to pull accurate live and historical market data natively.
-  - Implements local JSON persistence for Portfolio Tracking APIs.
-  - Contains an automated mathematical analysis engine computing SMA, MACD, Bollinger Bands, and RSI over historic pricing.
-  - Plugs into Gemini 1.5 Flash to automatically dictate structured JSON Buy/Sell/Hold recommendations.
-- **Frontend**: Streamlit
-  - Consumes APIs from the Node Backend.
-  - Renders professional Plotly Candlestick and RSI subplot charts cleanly.
-  - Designed with an aggressive dark theme utilizing custom configuration protocols.
+  - Live market data via `@rumess/nepse-api`.
+  - Technical analysis engine (RSI, SMA, MACD, Bollinger Bands) using `technicalindicators`.
+  - Gemini 1.5 Flash integration for AI-powered trade recommendations.
+  - Local JSON persistence for portfolio tracking.
+- **Frontend**: React + Vite + Tailwind CSS v4
+  - Modern, responsive dark-themed dashboard.
+  - Advanced data visualization with `recharts`.
+  - Client-side routing with `react-router-dom`.
 
 ## Getting Started
 
-### 1. Requirements
-Ensure you have `Node.js` (v18+) and `Python` (v3.10+) installed.
+### 1. Prerequisites
+- Node.js (v18+)
+- Gemini API Key ([Get one here](https://aistudio.google.com/))
 
 ### 2. Backend Setup
 ```bash
 cd backend
 npm install
 ```
-Configure your `.env`:
-```
-GEMINI_API_KEY=your_gemini_api_key_here
+Create a `.env` file in the `backend` directory:
+```env
+GEMINI_API_KEY=your_key_here
 PORT=5000
 ```
-Run the API Service:
+Run the server:
 ```bash
-node index.js
+npm start
 ```
-The server will boot locally on Port `5000`.
 
 ### 3. Frontend Setup
 ```bash
-cd frontend
-python3 -m venv .venv
-source .venv/bin/activate
-pip install -r requirements.txt
+cd react-frontend
+npm install
+npm run dev
 ```
-Run the Interface:
-```bash
-streamlit run app.py
-```
-You can then view the platform seamlessly over your web browser at Port `8501`.
+The dashboard will be available at `http://localhost:5173`.
+
+## Deployment to Vercel
+
+### Frontend (Vite)
+1. Push your code to GitHub.
+2. Connect your repository to [Vercel](https://vercel.com).
+3. Vercel will automatically detect the Vite project. 
+4. Ensure the **Root Directory** is set to `react-frontend`.
+5. Set the **Build Command** to `npm run build` and **Output Directory** to `dist`.
+
+### Backend
+For production deployment, consider:
+- Deploying the `backend` to a service like **Render**, **Railway**, or **Heroku**.
+- Updating the `API_BASE_URL` in `react-frontend/src/services/api.js` to your deployed backend URL.
+- > [!NOTE]
+  > The current portfolio system uses local JSON. For multi-user production, replace `portfolioService.js` logic with a database like MongoDB.
