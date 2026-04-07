@@ -81,7 +81,7 @@ const Market = () => {
                            <Building2 size={16} />
                         </div>
                         <span className="text-sm font-medium text-neutral-300 group-hover:text-neutral-100 transition-colors">
-                          {company.name}
+                          {company.securityName}
                         </span>
                       </div>
                     </td>

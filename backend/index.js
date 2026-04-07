@@ -14,6 +14,11 @@ app.get('/', (req, res) => {
     res.send('Welcome to the NEPSE Analysis API!');
 });
 
+// Add a testing route
+app.get('/test', (req, res) => {
+    res.json({ message: 'Testing endpoint is working!' });
+});
+
 // Global Error Handler
 app.use((err, req, res, next) => {
     console.error(err.stack);

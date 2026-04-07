@@ -48,7 +48,7 @@ const Dashboard = () => {
   const mainIndex = Array.isArray(indexData) ? indexData[0] : indexData;
 
   const stats = [
-    { name: 'NEPSE Index', value: mainIndex?.index || '0.00', change: mainIndex?.change || '0.00', percent: mainIndex?.percentChange || '0.00%', icon: Activity, color: 'blue' },
+    { name: 'NEPSE Index', value: mainIndex?.close || '0.00', change: mainIndex?.change || '0.00', percent: mainIndex?.perChange ? `${mainIndex.perChange}%` : '0.00%', icon: Activity, color: 'blue' },
     { name: 'Daily Volume', value: 'N/A', change: '', percent: '', icon: BarChart3, color: 'emerald' },
     { name: 'Total Turnover', value: 'N/A', change: '', percent: '', icon: DollarSign, color: 'amber' },
     { name: 'Market Cap', value: 'N/A', change: '', percent: '', icon: TrendingUp, color: 'purple' },
@@ -96,10 +96,10 @@ const Dashboard = () => {
               <div key={i} className="flex items-center justify-between p-4 bg-neutral-800/30 rounded-xl hover:bg-neutral-800/50 transition-colors border border-transparent hover:border-neutral-700 cursor-pointer">
                 <div>
                   <p className="font-bold text-neutral-100">{stock.symbol}</p>
-                  <p className="text-xs text-neutral-500">{stock.name || 'Company Name'}</p>
+                  <p className="text-xs text-neutral-500">{stock.securityName || 'Company Name'}</p>
                 </div>
                 <div className="text-right">
-                  <p className="font-bold text-neutral-100">Rs. {stock.lastTradedPrice}</p>
+                  <p className="font-bold text-neutral-100">Rs. {stock.ltp}</p>
                   <p className="text-xs font-semibold text-emerald-400">+{stock.percentageChange}%</p>
                 </div>
               </div>
@@ -124,10 +124,10 @@ const Dashboard = () => {
               <div key={i} className="flex items-center justify-between p-4 bg-neutral-800/30 rounded-xl hover:bg-neutral-800/50 transition-colors border border-transparent hover:border-neutral-700 cursor-pointer">
                 <div>
                   <p className="font-bold text-neutral-100">{stock.symbol}</p>
-                  <p className="text-xs text-neutral-500">{stock.name || 'Company Name'}</p>
+                  <p className="text-xs text-neutral-500">{stock.securityName || 'Company Name'}</p>
                 </div>
                 <div className="text-right">
-                  <p className="font-bold text-neutral-100">Rs. {stock.lastTradedPrice}</p>
+                  <p className="font-bold text-neutral-100">Rs. {stock.ltp}</p>
                   <p className="text-xs font-semibold text-red-400">{stock.percentageChange}%</p>
                 </div>
               </div>
