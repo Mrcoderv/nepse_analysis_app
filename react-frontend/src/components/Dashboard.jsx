@@ -66,7 +66,7 @@ const Dashboard = () => {
   const stats = [
     { 
         name: 'NEPSE Index', 
-        value: indexData?.close || '0.00', 
+        value: indexData?.currentValue || indexData?.close || '0.00', 
         change: indexData?.change || '0.00', 
         percent: indexData?.perChange ? `${indexData.perChange}%` : '0.00%', 
         icon: Activity, 
@@ -133,7 +133,12 @@ const Dashboard = () => {
               </div>
               <h3 className="text-lg font-bold">Top Gainers</h3>
             </div>
-            <button className="text-xs font-semibold text-blue-400 hover:text-blue-300">View All</button>
+            <button 
+              onClick={() => navigate('/market')}
+              className="text-xs font-semibold text-blue-400 hover:text-blue-300"
+            >
+              View All
+            </button>
           </div>
           <div className="space-y-4">
             {gainers.map((stock, i) => (
@@ -165,7 +170,12 @@ const Dashboard = () => {
               </div>
               <h3 className="text-lg font-bold">Top Losers</h3>
             </div>
-            <button className="text-xs font-semibold text-blue-400 hover:text-blue-300">View All</button>
+            <button 
+              onClick={() => navigate('/market')}
+              className="text-xs font-semibold text-blue-400 hover:text-blue-300"
+            >
+              View All
+            </button>
           </div>
           <div className="space-y-4">
             {losers.map((stock, i) => (
