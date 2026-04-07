@@ -1,24 +1,32 @@
 import React, { useEffect, useState } from 'react';
-import { getNepseIndex, getTopGainers, getTopLosers } from '../services/api';
+import { getNepseIndex, getTopGainers, getTopLosers, getMarketSummary } from '../services/api';
 import { TrendingUp, TrendingDown, Activity, DollarSign, BarChart3 } from 'lucide-react';
 
 const Dashboard = () => {
   const [indexData, setIndexData] = useState(null);
   const [gainers, setGainers] = useState([]);
   const [losers, setLosers] = useState([]);
+  const [summary, setSummary] = useState(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const [indexRes, gainersRes, losersRes] = await Promise.all([
+        const [indexRes, gainersRes, losersRes, summaryRes] = await Promise.all([
           getNepseIndex(),
           getTopGainers(),
-          getTopLosers()
+          getTopLosers(),
+          getMarketSummary()
         ]);
-        setIndexData(indexRes.data);
+        
+        // Find the actual NEPSE Index (not Sensitive Index)
+        const allIndices = Array.isArray(indexRes.data) ? indexRes.data : [];
+        const actualNepseIndex = allIndices.find(idx => idx.index === 'NEPSE Index') || allIndices[0];
+        
+        setIndexData(actualNepseIndex);
         setGainers(Array.isArray(gainersRes.data) ? gainersRes.data.slice(0, 5) : []);
         setLosers(Array.isArray(losersRes.data) ? losersRes.data.slice(0, 5) : []);
+        setSummary(summaryRes.data);
       } catch (err) {
         console.error('Failed to fetch dashboard data:', err);
       } finally {
@@ -44,14 +52,48 @@ const Dashboard = () => {
     );
   }
 
-  // Handle nested index data if needed (depends on @rumess/nepse-api response)
-  const mainIndex = Array.isArray(indexData) ? indexData[0] : indexData;
+  const formatCurrency = (val) => {
+    if (!val) return 'N/A';
+    const num = parseFloat(val);
+    if (num >= 1e12) return (num / 1e12).toFixed(2) + ' T';
+    if (num >= 1e9) return (num / 1e9).toFixed(2) + ' B';
+    if (num >= 1e7) return (num / 1e7).toFixed(2) + ' Cr';
+    return num.toLocaleString();
+  };
 
   const stats = [
-    { name: 'NEPSE Index', value: mainIndex?.close || '0.00', change: mainIndex?.change || '0.00', percent: mainIndex?.perChange ? `${mainIndex.perChange}%` : '0.00%', icon: Activity, color: 'blue' },
-    { name: 'Daily Volume', value: 'N/A', change: '', percent: '', icon: BarChart3, color: 'emerald' },
-    { name: 'Total Turnover', value: 'N/A', change: '', percent: '', icon: DollarSign, color: 'amber' },
-    { name: 'Market Cap', value: 'N/A', change: '', percent: '', icon: TrendingUp, color: 'purple' },
+    { 
+        name: 'NEPSE Index', 
+        value: indexData?.close || '0.00', 
+        change: indexData?.change || '0.00', 
+        percent: indexData?.perChange ? `${indexData.perChange}%` : '0.00%', 
+        icon: Activity, 
+        color: 'blue' 
+    },
+    { 
+        name: 'Daily Volume', 
+        value: formatCurrency(summary?.['Total Traded Shares']), 
+        change: '', 
+        percent: '', 
+        icon: BarChart3, 
+        color: 'emerald' 
+    },
+    { 
+        name: 'Total Turnover', 
+        value: formatCurrency(summary?.['Total Turnover Rs:']), 
+        change: '', 
+        percent: '', 
+        icon: DollarSign, 
+        color: 'amber' 
+    },
+    { 
+        name: 'Market Cap', 
+        value: formatCurrency(summary?.['Total Market Capitalization Rs:']), 
+        change: '', 
+        percent: '', 
+        icon: TrendingUp, 
+        color: 'purple' 
+    },
   ];
 
   return (

@@ -29,7 +29,8 @@ const nepseService = {
          // Let's assume symbol or ID works, or we will fix it if it doesn't.
     }),
     getSecurityPriceVolumeHistory: (symbol) => getCachedData(`history_${symbol}`, 3600000, () => nepse.getSecurityPriceVolumeHistory(symbol)),
-    getFloorSheet: () => getCachedData('floorsheet', 30000, () => nepse.getFloorSheet())
+    getFloorSheet: () => getCachedData('floorsheet', 30000, () => nepse.getFloorSheet()),
+    getMarketSummary: () => getCachedData('marketSummary', 60000, () => nepse.getMarketSummary())
 };
 
 module.exports = nepseService;

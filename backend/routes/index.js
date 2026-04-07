@@ -30,6 +30,13 @@ router.get('/NepseIndex', async (req, res, next) => {
     } catch (err) { next(err); }
 });
 
+router.get('/MarketSummary', async (req, res, next) => {
+    try {
+        const data = await nepseService.getMarketSummary();
+        res.json(data);
+    } catch (err) { next(err); }
+});
+
 router.get('/CompanyList', async (req, res, next) => {
     try {
         const data = await nepseService.getCompanyList();

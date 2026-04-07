@@ -17,5 +17,6 @@ export const getPortfolio = () => api.get('/portfolio');
 export const addStockToPortfolio = (stockData) => api.post('/portfolio', stockData);
 export const getStockAnalysis = (symbol) => api.get(`/analyze/${symbol}`);
 export const getAIAnalysis = (symbol) => api.get(`/ai-analysis/${symbol}`);
+export const getMarketSummary = () => api.get('/MarketSummary');
 
 export default api;
