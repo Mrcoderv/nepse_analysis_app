@@ -12,21 +12,21 @@ const Dashboard = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const [indexRes, gainersRes, losersRes, summaryRes] = await Promise.all([
+        const [indexRes, gainersRes, losersRes, summaryRes] = await Promise.allSettled([
           getNepseIndex(),
           getTopGainers(),
           getTopLosers(),
           getMarketSummary()
         ]);
         
-        // Find the actual NEPSE Index (not Sensitive Index)
-        const allIndices = Array.isArray(indexRes.data) ? indexRes.data : [];
-        const actualNepseIndex = allIndices.find(idx => idx.index === 'NEPSE Index') || allIndices[0];
+        if (indexRes.status === 'fulfilled') {
+          const allIndices = Array.isArray(indexRes.value.data) ? indexRes.value.data : [];
+          setIndexData(allIndices.find(idx => idx.index === 'NEPSE Index') || allIndices[0]);
+        }
         
-        setIndexData(actualNepseIndex);
-        setGainers(Array.isArray(gainersRes.data) ? gainersRes.data.slice(0, 5) : []);
-        setLosers(Array.isArray(losersRes.data) ? losersRes.data.slice(0, 5) : []);
-        setSummary(summaryRes.data);
+        if (gainersRes.status === 'fulfilled') setGainers(Array.isArray(gainersRes.value.data) ? gainersRes.value.data.slice(0, 5) : []);
+        if (losersRes.status === 'fulfilled') setLosers(Array.isArray(losersRes.value.data) ? losersRes.value.data.slice(0, 5) : []);
+        if (summaryRes.status === 'fulfilled') setSummary(summaryRes.value.data);
       } catch (err) {
         console.error('Failed to fetch dashboard data:', err);
       } finally {
