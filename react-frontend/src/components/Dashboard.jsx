@@ -66,7 +66,7 @@ const Dashboard = () => {
   const stats = [
     { 
         name: 'NEPSE Index', 
-        value: indexData?.close || '0.00', 
+        value: indexData?.currentValue || indexData?.close || '0.00', 
         change: indexData?.change || '0.00', 
         percent: indexData?.perChange ? `${indexData.perChange}%` : '0.00%', 
         icon: Activity, 
