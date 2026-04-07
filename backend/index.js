@@ -10,6 +10,9 @@ app.use(cors());
 app.use(express.json());
 
 app.use('/api', apiRoutes);
+app.get('/', (req, res) => {
+    res.send('Welcome to the NEPSE Analysis API!');
+});
 
 // Global Error Handler
 app.use((err, req, res, next) => {
