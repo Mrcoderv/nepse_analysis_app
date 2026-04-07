@@ -1,8 +1,10 @@
 import React, { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { getNepseIndex, getTopGainers, getTopLosers, getMarketSummary } from '../services/api';
 import { TrendingUp, TrendingDown, Activity, DollarSign, BarChart3 } from 'lucide-react';
 
 const Dashboard = () => {
+  const navigate = useNavigate();
   const [indexData, setIndexData] = useState(null);
   const [gainers, setGainers] = useState([]);
   const [losers, setLosers] = useState([]);
@@ -135,7 +137,11 @@ const Dashboard = () => {
           </div>
           <div className="space-y-4">
             {gainers.map((stock, i) => (
-              <div key={i} className="flex items-center justify-between p-4 bg-neutral-800/30 rounded-xl hover:bg-neutral-800/50 transition-colors border border-transparent hover:border-neutral-700 cursor-pointer">
+              <div 
+                key={i} 
+                onClick={() => navigate(`/stock/${stock.symbol}`)}
+                className="flex items-center justify-between p-4 bg-neutral-800/30 rounded-xl hover:bg-neutral-800/50 transition-colors border border-transparent hover:border-neutral-700 cursor-pointer"
+              >
                 <div>
                   <p className="font-bold text-neutral-100">{stock.symbol}</p>
                   <p className="text-xs text-neutral-500">{stock.securityName || 'Company Name'}</p>
@@ -163,7 +169,11 @@ const Dashboard = () => {
           </div>
           <div className="space-y-4">
             {losers.map((stock, i) => (
-              <div key={i} className="flex items-center justify-between p-4 bg-neutral-800/30 rounded-xl hover:bg-neutral-800/50 transition-colors border border-transparent hover:border-neutral-700 cursor-pointer">
+              <div 
+                key={i} 
+                onClick={() => navigate(`/stock/${stock.symbol}`)}
+                className="flex items-center justify-between p-4 bg-neutral-800/30 rounded-xl hover:bg-neutral-800/50 transition-colors border border-transparent hover:border-neutral-700 cursor-pointer"
+              >
                 <div>
                   <p className="font-bold text-neutral-100">{stock.symbol}</p>
                   <p className="text-xs text-neutral-500">{stock.securityName || 'Company Name'}</p>
