@@ -28,7 +28,13 @@ const nepseService = {
          // We might need to map symbol to ID. The frontend might send ID or symbol. 
          // Let's assume symbol or ID works, or we will fix it if it doesn't.
     }),
-    getSecurityPriceVolumeHistory: (symbol) => getCachedData(`history_${symbol}`, 3600000, () => nepse.getSecurityPriceVolumeHistory(symbol)),
+    getSecurityPriceVolumeHistory: (symbol) => getCachedData(`history_${symbol}`, 3600000, async () => {
+        const securityId = (await nepse.getSecuritySymbolIdKeymap()).get(symbol);
+        if (!securityId) throw new Error(`Security symbol ${symbol} not found`);
+        // We override the default library call to fetch more history (size=500) 
+        // which is required for indicators like RSI(14), SMA(50), and SMA(200) to calculate correctly.
+        return await nepse.requestGETAPI(`${nepse.apiEndpoints.security_price_volume_history}${securityId}?size=500`);
+    }),
     getFloorSheet: () => getCachedData('floorsheet', 30000, () => nepse.getFloorSheet()),
     getMarketSummary: () => getCachedData('marketSummary', 60000, () => nepse.getMarketSummary())
 };

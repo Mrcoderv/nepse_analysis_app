@@ -218,35 +218,90 @@ const StockDetail = () => {
           </div>
 
           {/* Key data points grid */}
-          <div className="p-6 bg-neutral-900 border border-neutral-800 rounded-3xl relative overflow-hidden">
-            <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-blue-500 via-violet-500 to-emerald-500"></div>
-            <h3 className="text-sm font-semibold text-neutral-500 mb-6 flex items-center">
-              <Info size={14} className="mr-2 text-blue-500" /> SENSOR METRICS
-            </h3>
-            <div className="grid grid-cols-1 gap-4">
-              <div className="flex justify-between items-center p-3 border-b border-neutral-800 hover:bg-neutral-800/20 rounded-xl transition-colors">
-                <span className="text-xs text-neutral-500 font-medium tracking-tight">RSI (14)</span>
-                <span className={`text-sm font-black ${indicators.currentRSI > 70 ? 'text-red-400' : indicators.currentRSI < 30 ? 'text-emerald-400' : 'text-blue-400'}`}>
-                  {indicators.currentRSI?.toFixed(2) || 'N/A'}
-                </span>
-              </div>
-              <div className="flex justify-between items-center p-3 border-b border-neutral-800 hover:bg-neutral-800/20 rounded-xl transition-colors">
-                <span className="text-xs text-neutral-500 font-medium tracking-tight">MACD Signal</span>
-                <span className="text-sm font-black text-neutral-100">{indicators.currentMACD?.signal?.toFixed(2) || '0.00'}</span>
-              </div>
-              <div className="flex justify-between items-center p-3 border-b border-neutral-800 hover:bg-neutral-800/20 rounded-xl transition-colors">
-                <span className="text-xs text-neutral-500 font-medium tracking-tight">BB Compression</span>
-                <span className="text-sm font-black text-neutral-300">
-                   {indicators.currentBB ? ((indicators.currentBB.upper - indicators.currentBB.lower) / indicators.currentBB.middle * 100).toFixed(1) + '%' : 'N/A'}
-                </span>
-              </div>
-              <div className="flex justify-between items-center p-3 hover:bg-neutral-800/20 rounded-xl transition-colors">
-                <span className="text-xs text-neutral-500 font-medium tracking-tight">Volume Ratio</span>
-                <span className={`text-sm font-black ${indicators.lastVolume > indicators.currentVolSMA * 1.5 ? 'text-emerald-400 animate-pulse' : 'text-neutral-400'}`}>
-                   {(indicators.lastVolume / (indicators.currentVolSMA || 1)).toFixed(2)}x
-                </span>
+          <div className="space-y-4">
+
+            {/* GROUP 1: Trend */}
+            <div className="p-4 bg-neutral-900 border border-neutral-800 rounded-2xl relative overflow-hidden">
+              <div className="absolute top-0 left-0 w-full h-0.5 bg-gradient-to-r from-blue-500 to-cyan-400"></div>
+              <p className="text-[10px] font-black text-blue-500 uppercase tracking-widest mb-3">📈 Trend</p>
+              <div className="space-y-2">
+                {[
+                  { label: 'EMA 9', value: indicators.currentEMA9?.toFixed(2), color: indicators.currentEMA9 > indicators.currentEMA21 ? 'text-emerald-400' : 'text-red-400' },
+                  { label: 'EMA 21', value: indicators.currentEMA21?.toFixed(2), color: 'text-neutral-300' },
+                  { label: 'SMA 50', value: indicators.currentSMA50?.toFixed(2), color: 'text-neutral-300' },
+                  { label: 'SMA 200', value: indicators.currentSMA200?.toFixed(2), color: 'text-neutral-300' },
+                  { label: 'ADX', value: indicators.currentADX?.adx?.toFixed(1), color: indicators.currentADX?.adx > 25 ? 'text-amber-400' : 'text-neutral-500' },
+                  { label: 'PSAR', value: indicators.currentPSAR?.toFixed(2), color: lastPrice > indicators.currentPSAR ? 'text-emerald-400' : 'text-red-400' },
+                ].map(row => (
+                  <div key={row.label} className="flex justify-between items-center py-1 border-b border-neutral-800/50 last:border-0">
+                    <span className="text-[11px] text-neutral-500">{row.label}</span>
+                    <span className={`text-[11px] font-black ${row.color}`}>{row.value || 'N/A'}</span>
+                  </div>
+                ))}
               </div>
             </div>
+
+            {/* GROUP 2: Momentum */}
+            <div className="p-4 bg-neutral-900 border border-neutral-800 rounded-2xl relative overflow-hidden">
+              <div className="absolute top-0 left-0 w-full h-0.5 bg-gradient-to-r from-violet-500 to-pink-400"></div>
+              <p className="text-[10px] font-black text-violet-400 uppercase tracking-widest mb-3">⚡ Momentum</p>
+              <div className="space-y-2">
+                {[
+                  { label: 'RSI (14)', value: indicators.currentRSI?.toFixed(1), color: indicators.currentRSI > 70 ? 'text-red-400' : indicators.currentRSI < 30 ? 'text-emerald-400' : 'text-blue-400' },
+                  { label: 'Stoch %K', value: indicators.currentStoch?.k?.toFixed(1), color: indicators.currentStoch?.k > 80 ? 'text-red-400' : indicators.currentStoch?.k < 20 ? 'text-emerald-400' : 'text-neutral-300' },
+                  { label: 'Stoch %D', value: indicators.currentStoch?.d?.toFixed(1), color: 'text-neutral-400' },
+                  { label: 'CCI (20)', value: indicators.currentCCI?.toFixed(1), color: indicators.currentCCI > 100 ? 'text-red-400' : indicators.currentCCI < -100 ? 'text-emerald-400' : 'text-neutral-300' },
+                  { label: 'Williams %R', value: indicators.currentWilliamR?.toFixed(1), color: indicators.currentWilliamR > -20 ? 'text-red-400' : indicators.currentWilliamR < -80 ? 'text-emerald-400' : 'text-neutral-300' },
+                  { label: 'MFI (14)', value: indicators.currentMFI?.toFixed(1), color: indicators.currentMFI > 80 ? 'text-red-400' : indicators.currentMFI < 20 ? 'text-emerald-400' : 'text-neutral-300' },
+                  { label: 'MACD Signal', value: indicators.currentMACD?.signal?.toFixed(2), color: indicators.currentMACD?.MACD > indicators.currentMACD?.signal ? 'text-emerald-400' : 'text-red-400' },
+                ].map(row => (
+                  <div key={row.label} className="flex justify-between items-center py-1 border-b border-neutral-800/50 last:border-0">
+                    <span className="text-[11px] text-neutral-500">{row.label}</span>
+                    <span className={`text-[11px] font-black ${row.color}`}>{row.value || 'N/A'}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* GROUP 3: Volatility */}
+            <div className="p-4 bg-neutral-900 border border-neutral-800 rounded-2xl relative overflow-hidden">
+              <div className="absolute top-0 left-0 w-full h-0.5 bg-gradient-to-r from-amber-500 to-orange-400"></div>
+              <p className="text-[10px] font-black text-amber-400 uppercase tracking-widest mb-3">🌊 Volatility</p>
+              <div className="space-y-2">
+                {[
+                  { label: 'ATR (14)', value: indicators.currentATR?.toFixed(2), color: 'text-neutral-300' },
+                  { label: 'BB Upper', value: indicators.currentBB?.upper?.toFixed(2), color: 'text-neutral-400' },
+                  { label: 'BB Middle', value: indicators.currentBB?.middle?.toFixed(2), color: 'text-neutral-300' },
+                  { label: 'BB Lower', value: indicators.currentBB?.lower?.toFixed(2), color: 'text-neutral-400' },
+                  { label: 'BB Compression', value: indicators.currentBB ? ((indicators.currentBB.upper - indicators.currentBB.lower) / indicators.currentBB.middle * 100).toFixed(1) + '%' : 'N/A', color: 'text-amber-400' },
+                ].map(row => (
+                  <div key={row.label} className="flex justify-between items-center py-1 border-b border-neutral-800/50 last:border-0">
+                    <span className="text-[11px] text-neutral-500">{row.label}</span>
+                    <span className={`text-[11px] font-black ${row.color}`}>{row.value || 'N/A'}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* GROUP 4: Volume */}
+            <div className="p-4 bg-neutral-900 border border-neutral-800 rounded-2xl relative overflow-hidden">
+              <div className="absolute top-0 left-0 w-full h-0.5 bg-gradient-to-r from-emerald-500 to-teal-400"></div>
+              <p className="text-[10px] font-black text-emerald-400 uppercase tracking-widest mb-3">📊 Volume</p>
+              <div className="space-y-2">
+                {[
+                  { label: 'Volume Ratio', value: ((indicators.lastVolume || 0) / (indicators.currentVolSMA || 1)).toFixed(2) + 'x', color: (indicators.lastVolume || 0) > (indicators.currentVolSMA || 0) * 1.5 ? 'text-emerald-400' : 'text-neutral-400' },
+                  { label: 'Vol SMA (20)', value: indicators.currentVolSMA ? Math.round(indicators.currentVolSMA).toLocaleString() : 'N/A', color: 'text-neutral-300' },
+                  { label: 'Last Volume', value: indicators.lastVolume ? indicators.lastVolume.toLocaleString() : 'N/A', color: 'text-neutral-300' },
+                  { label: 'OBV Trend', value: indicators.currentOBV > 0 ? '▲ Rising' : '▼ Falling', color: indicators.currentOBV > 0 ? 'text-emerald-400' : 'text-red-400' },
+                ].map(row => (
+                  <div key={row.label} className="flex justify-between items-center py-1 border-b border-neutral-800/50 last:border-0">
+                    <span className="text-[11px] text-neutral-500">{row.label}</span>
+                    <span className={`text-[11px] font-black ${row.color}`}>{row.value || 'N/A'}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+
           </div>
         </div>
       </div>
