@@ -55,7 +55,10 @@ router.get('/history/:symbol', async (req, res, next) => {
     try {
         const data = await nepseService.getSecurityPriceVolumeHistory(req.params.symbol);
         res.json(data);
-    } catch (err) { next(err); }
+    } catch (err) {
+        console.error(`Error fetching history for symbol ${req.params.symbol}:`, err);
+        next(err);
+    }
 });
 
 router.get('/floorsheet', async (req, res, next) => {
@@ -94,7 +97,10 @@ router.get('/analyze/:symbol', async (req, res, next) => {
     try {
         const analysis = await analysisService.analyzeSecurity(req.params.symbol);
         res.json(analysis);
-    } catch (err) { next(err); }
+    } catch (err) {
+        console.error(`Error analyzing symbol ${req.params.symbol}:`, err);
+        next(err);
+    }
 });
 
 router.get('/signals/:symbol', async (req, res, next) => {
