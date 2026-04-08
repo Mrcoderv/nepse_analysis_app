@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
-import { getStockHistory, getStockAnalysis, getAIAnalysis, getCompanyDetails } from '../services/api';
+import { getStockHistory, getStockAnalysis, getAIAnalysis } from '../services/api';
 import { ResponsiveContainer, AreaChart, Area, XAxis, YAxis, Tooltip, CartesianGrid, ReferenceLine } from 'recharts';
 import { Brain, Zap, ShieldCheck, AlertCircle, Info, TrendingUp, TrendingDown, Target } from 'lucide-react';
 
@@ -12,6 +12,8 @@ const StockDetail = () => {
   const [loading, setLoading] = useState(true);
   const [aiLoading, setAiLoading] = useState(false);
 
+  const lastPrice = analysis?.lastPrice || 0; // Ensure lastPrice is scoped correctly
+
   useEffect(() => {
     const fetchData = async () => {
       setLoading(true);
@@ -21,7 +23,6 @@ const StockDetail = () => {
           getStockAnalysis(symbol)
         ]);
         
-        // Transform history for Recharts
         const data = (histRes.data.content || []).map(item => ({
           date: item.businessDate,
           price: item.closePrice,
@@ -31,7 +32,8 @@ const StockDetail = () => {
         setHistory(data);
         setAnalysis(analRes.data);
       } catch (err) {
-        console.error('Failed to fetch stock details:', err);
+        console.error(`Failed to fetch stock details for ${symbol}:`, err);
+        alert(`Error fetching stock details for ${symbol}. Please try again later.`);
       } finally {
         setLoading(false);
       }
