@@ -2,6 +2,8 @@ import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { LayoutDashboard, ChartLine, Briefcase, Info, Menu, X } from 'lucide-react';
 
+import Footer from './Footer';
+
 const Layout = ({ children }) => {
   const [isSidebarOpen, setIsSidebarOpen] = React.useState(true);
   const location = useLocation();
@@ -14,9 +16,9 @@ const Layout = ({ children }) => {
   ];
 
   return (
-    <div className="min-h-screen bg-neutral-950 text-neutral-100 flex">
+    <div className="min-h-screen bg-neutral-950 text-neutral-100 flex overflow-hidden">
       {/* Sidebar */}
-      <aside className={`bg-neutral-900 border-r border-neutral-800 transition-all duration-300 ease-in-out ${isSidebarOpen ? 'w-64' : 'w-20'} flex flex-col`}>
+      <aside className={`bg-neutral-900 border-r border-neutral-800 transition-all duration-300 ease-in-out ${isSidebarOpen ? 'w-64' : 'w-20'} flex flex-col h-screen`}>
         <div className="p-6 flex items-center justify-between">
           {isSidebarOpen && <h1 className="text-xl font-bold bg-gradient-to-r from-blue-500 to-emerald-500 bg-clip-text text-transparent">NEPSE AI</h1>}
           <button onClick={() => setIsSidebarOpen(!isSidebarOpen)} className="p-2 hover:bg-neutral-800 rounded-lg transition-colors">
@@ -59,8 +61,8 @@ const Layout = ({ children }) => {
       </aside>
 
       {/* Main Content */}
-      <main className="flex-1 h-screen overflow-y-auto">
-        <header className="h-16 border-b border-neutral-800 bg-neutral-950/80 backdrop-blur-md sticky top-0 z-10 px-8 flex items-center justify-between">
+      <main className="flex-1 h-screen overflow-y-auto flex flex-col">
+        <header className="h-16 border-b border-neutral-800 bg-neutral-950/80 backdrop-blur-md sticky top-0 z-10 px-8 flex items-center justify-between shrink-0">
           <h2 className="text-lg font-semibold text-neutral-200">
             {navItems.find(i => i.path === location.pathname)?.name || 'Dashboard'}
           </h2>
@@ -74,9 +76,11 @@ const Layout = ({ children }) => {
           </div>
         </header>
 
-        <div className="p-8">
+        <div className="p-8 flex-1">
           {children}
         </div>
+        
+        <Footer />
       </main>
     </div>
   );
