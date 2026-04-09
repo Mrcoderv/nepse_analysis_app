@@ -6,7 +6,39 @@ import Footer from './Footer';
 
 const Layout = ({ children }) => {
   const [isSidebarOpen, setIsSidebarOpen] = React.useState(true);
+  const [isMarketOpen, setIsMarketOpen] = React.useState(true);
   const location = useLocation();
+
+  React.useEffect(() => {
+    const checkMarketStatus = () => {
+      try {
+        const formatter = new Intl.DateTimeFormat('en-US', {
+          timeZone: 'Asia/Kathmandu',
+          hour: 'numeric',
+          weekday: 'short',
+          hour12: false
+        });
+        const parts = formatter.formatToParts(new Date());
+        let hour = 0;
+        let weekday = '';
+        parts.forEach(p => {
+          if (p.type === 'hour') hour = parseInt(p.value, 10);
+          if (p.type === 'weekday') weekday = p.value;
+        });
+        
+        if (weekday === 'Fri' || weekday === 'Sat' || hour < 11 || hour >= 15) {
+          setIsMarketOpen(false);
+        } else {
+          setIsMarketOpen(true);
+        }
+      } catch (e) {
+        console.error("Error formatting time:", e);
+      }
+    };
+    checkMarketStatus();
+    const interval = setInterval(checkMarketStatus, 60000);
+    return () => clearInterval(interval);
+  }, []);
 
   const navItems = [
     { name: 'Dashboard', path: '/', icon: LayoutDashboard },
@@ -67,8 +99,12 @@ const Layout = ({ children }) => {
             {navItems.find(i => i.path === location.pathname)?.name || 'Dashboard'}
           </h2>
           <div className="flex items-center space-x-4">
-             <span className="text-xs font-mono px-2 py-1 bg-emerald-500/10 text-emerald-400 rounded-full border border-emerald-500/20">
-               Market Open
+             <span className={`text-xs font-mono px-2 py-1 rounded-full border ${
+               isMarketOpen 
+                 ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20' 
+                 : 'bg-red-500/10 text-red-500 border-red-500/20'
+             }`}>
+               {isMarketOpen ? 'Market Open' : 'Market off'}
              </span>
              <button className="text-sm font-medium text-neutral-400 hover:text-neutral-100 transition-colors">
                Log in

@@ -12,6 +12,7 @@ const Dashboard = () => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    let intervalId;
     const fetchData = async () => {
       try {
         const [indexRes, gainersRes, losersRes, summaryRes] = await Promise.allSettled([
@@ -35,7 +36,14 @@ const Dashboard = () => {
         setLoading(false);
       }
     };
+    
+    // Initial fetch
     fetchData();
+    
+    // Reverify/refresh data every 60 seconds (useful around 3:15 PM for accurate post-market data)
+    intervalId = setInterval(fetchData, 60000);
+    
+    return () => clearInterval(intervalId);
   }, []);
 
   if (loading) {
