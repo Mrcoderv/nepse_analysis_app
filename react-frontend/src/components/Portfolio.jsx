@@ -1,12 +1,15 @@
 import React, { useEffect, useState } from 'react';
-import { getPortfolio, addStockToPortfolio } from '../services/api';
-import { Briefcase, Plus, TrendingUp, TrendingDown, Wallet, PieChart, Loader2 } from 'lucide-react';
+import { Link } from 'react-router-dom';
+import { getPortfolio, addStockToPortfolio, updatePortfolio, deletePortfolio } from '../services/api';
+import { Briefcase, Plus, TrendingUp, TrendingDown, Wallet, PieChart, Loader2, Trash2, Edit2, Check, X, ExternalLink } from 'lucide-react';
 
 const Portfolio = () => {
   const [holdings, setHoldings] = useState([]);
   const [loading, setLoading] = useState(true);
   const [form, setForm] = useState({ symbol: '', quantity: '', buyPrice: '' });
   const [submitting, setSubmitting] = useState(false);
+  const [editingId, setEditingId] = useState(null);
+  const [editForm, setEditForm] = useState({ quantity: '', buyPrice: '' });
 
   const fetchPortfolio = async () => {
     try {
@@ -21,6 +24,8 @@ const Portfolio = () => {
 
   useEffect(() => {
     fetchPortfolio();
+    const interval = setInterval(fetchPortfolio, 30000); // Poll every 30 seconds
+    return () => clearInterval(interval);
   }, []);
 
   const handleSubmit = async (e) => {
@@ -39,6 +44,34 @@ const Portfolio = () => {
       console.error('Failed to add stock:', err);
     } finally {
       setSubmitting(false);
+    }
+  };
+
+  const handleDelete = async (id) => {
+    if (!window.confirm('Are you sure you want to remove this stock from your portfolio?')) return;
+    try {
+      await deletePortfolio(id);
+      await fetchPortfolio();
+    } catch (err) {
+      console.error('Failed to delete stock:', err);
+    }
+  };
+
+  const startEditing = (h) => {
+    setEditingId(h.id);
+    setEditForm({ quantity: h.quantity, buyPrice: h.buyPrice });
+  };
+
+  const handleUpdate = async (id) => {
+    try {
+      await updatePortfolio(id, {
+        quantity: Number(editForm.quantity),
+        buyPrice: Number(editForm.buyPrice)
+      });
+      setEditingId(null);
+      await fetchPortfolio();
+    } catch (err) {
+      console.error('Failed to update stock:', err);
     }
   };
 
@@ -99,7 +132,9 @@ const Portfolio = () => {
                     <th className="px-6 py-4 text-[10px] font-black text-neutral-500 uppercase tracking-tighter text-right">Qty</th>
                     <th className="px-6 py-4 text-[10px] font-black text-neutral-500 uppercase tracking-tighter text-right">Avg. Price</th>
                     <th className="px-6 py-4 text-[10px] font-black text-neutral-500 uppercase tracking-tighter text-right">Current</th>
+                    <th className="px-6 py-4 text-[10px] font-black text-neutral-500 uppercase tracking-tighter text-center">Signal</th>
                     <th className="px-6 py-4 text-[10px] font-black text-neutral-500 uppercase tracking-tighter text-right">P/L %</th>
+                    <th className="px-6 py-4 text-[10px] font-black text-neutral-500 uppercase tracking-tighter text-right">Actions</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-neutral-800/50 text-sm">
@@ -108,24 +143,83 @@ const Portfolio = () => {
                       <tr key={i} className="animate-pulse">
                         <td className="px-6 py-5"><div className="h-4 w-12 bg-neutral-800 rounded"></div></td>
                         <td className="px-6 py-5"><div className="h-4 w-8 bg-neutral-800 rounded ml-auto"></div></td>
-                        <td colSpan="3"></td>
+                        <td colSpan="5"></td>
                       </tr>
                     ))
                   ) : holdings.length > 0 ? (
-                    holdings.map((h, i) => (
-                      <tr key={i} className="hover:bg-neutral-800/30 transition-colors">
-                        <td className="px-6 py-5 font-black text-blue-400">{h.symbol}</td>
-                        <td className="px-6 py-5 text-right font-medium">{h.quantity}</td>
-                        <td className="px-6 py-5 text-right text-neutral-400 font-mono">Rs. {h.buyPrice.toFixed(2)}</td>
+                    holdings.map((h) => (
+                      <tr key={h.id} className="hover:bg-neutral-800/30 transition-colors group">
+                        <td className="px-6 py-5">
+                          <Link 
+                            to={`/stock/${h.symbol}`}
+                            className="flex items-center space-x-2 font-black text-blue-400 hover:text-blue-300 transition-colors"
+                          >
+                            <span>{h.symbol}</span>
+                            <ExternalLink size={12} className="opacity-0 group-hover:opacity-100 transition-opacity" />
+                          </Link>
+                        </td>
+                        <td className="px-6 py-5 text-right font-medium">
+                          {editingId === h.id ? (
+                            <input
+                              type="number"
+                              className="w-20 bg-neutral-950 border border-neutral-700 rounded px-2 py-1 text-right focus:outline-none focus:border-blue-500"
+                              value={editForm.quantity}
+                              onChange={e => setEditForm({...editForm, quantity: e.target.value})}
+                            />
+                          ) : h.quantity}
+                        </td>
+                        <td className="px-6 py-5 text-right text-neutral-400 font-mono">
+                          {editingId === h.id ? (
+                            <input
+                              type="number"
+                              step="0.01"
+                              className="w-24 bg-neutral-950 border border-neutral-700 rounded px-2 py-1 text-right focus:outline-none focus:border-blue-500"
+                              value={editForm.buyPrice}
+                              onChange={e => setEditForm({...editForm, buyPrice: e.target.value})}
+                            />
+                          ) : `Rs. ${h.buyPrice.toFixed(2)}`}
+                        </td>
                         <td className="px-6 py-5 text-right font-bold text-neutral-100">Rs. {h.currentPrice.toFixed(2)}</td>
+                        <td className="px-6 py-5 text-center">
+                          <span className={`px-2 py-1 rounded-full text-[10px] font-black uppercase tracking-tight ${
+                            h.recommendation?.includes('buy') ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20' :
+                            h.recommendation?.includes('sell') ? 'bg-red-500/10 text-red-400 border border-red-500/20' :
+                            'bg-neutral-800 text-neutral-400 border border-neutral-700/50'
+                          }`}>
+                            {h.signal || 'HOLD'}
+                          </span>
+                        </td>
                         <td className={`px-6 py-5 text-right font-black ${h.percentReturn >= 0 ? 'text-emerald-400' : 'text-red-400'}`}>
                           {h.percentReturn >= 0 ? '+' : ''}{h.percentReturn}%
+                        </td>
+                        <td className="px-6 py-5 text-right">
+                          <div className="flex items-center justify-end space-x-2">
+                            {editingId === h.id ? (
+                              <>
+                                <button onClick={() => handleUpdate(h.id)} className="p-1.5 bg-emerald-500/10 text-emerald-400 hover:bg-emerald-500/20 rounded-lg transition-all">
+                                  <Check size={16} />
+                                </button>
+                                <button onClick={() => setEditingId(null)} className="p-1.5 bg-red-500/10 text-red-400 hover:bg-red-500/20 rounded-lg transition-all">
+                                  <X size={16} />
+                                </button>
+                              </>
+                            ) : (
+                              <>
+                                <button onClick={() => startEditing(h)} className="p-1.5 bg-blue-500/10 text-blue-400 hover:bg-blue-500/20 rounded-lg opacity-0 group-hover:opacity-100 transition-all">
+                                  <Edit2 size={16} />
+                                </button>
+                                <button onClick={() => handleDelete(h.id)} className="p-1.5 bg-red-500/10 text-red-400 hover:bg-red-500/20 rounded-lg opacity-0 group-hover:opacity-100 transition-all">
+                                  <Trash2 size={16} />
+                                </button>
+                              </>
+                            )}
+                          </div>
                         </td>
                       </tr>
                     ))
                   ) : (
                     <tr>
-                      <td colSpan="5" className="px-6 py-20 text-center text-neutral-500 italic">No stocks in portfolio yet</td>
+                      <td colSpan="6" className="px-6 py-20 text-center text-neutral-500 italic">No stocks in portfolio yet</td>
                     </tr>
                   )}
                 </tbody>
