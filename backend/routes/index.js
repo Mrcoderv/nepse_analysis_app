@@ -92,6 +92,24 @@ router.post('/portfolio', async (req, res, next) => {
     } catch (err) { next(err); }
 });
 
+router.put('/portfolio/:id', async (req, res, next) => {
+    try {
+        const { quantity, buyPrice } = req.body;
+        if (!quantity || !buyPrice) {
+            return res.status(400).json({ error: "Missing required fields: quantity, buyPrice" });
+        }
+        const data = await portfolioService.updateStock(req.params.id, quantity, buyPrice);
+        res.json(data);
+    } catch (err) { next(err); }
+});
+
+router.delete('/portfolio/:id', async (req, res, next) => {
+    try {
+        const data = await portfolioService.deleteStock(req.params.id);
+        res.json(data);
+    } catch (err) { next(err); }
+});
+
 // Advanced Stock Analysis Engine endpoint
 router.get('/analyze/:symbol', async (req, res, next) => {
     try {
