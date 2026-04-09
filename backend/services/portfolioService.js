@@ -3,16 +3,25 @@ const path = require('path');
 const nepseService = require('./nepseService');
 const analysisService = require('./analysisService');
 
-const dataDir = path.join(__dirname, '../data');
-const dataFile = path.join(dataDir, 'portfolio.json');
+const dataFile = path.resolve(process.cwd(), 'data', 'portfolio.json');
+const dataDir = path.dirname(dataFile);
 
 // Bootstrapping storage directory and file
-if (!fs.existsSync(dataDir)) {
-    fs.mkdirSync(dataDir, { recursive: true });
-}
-if (!fs.existsSync(dataFile)) {
-    fs.writeFileSync(dataFile, JSON.stringify([]));
-}
+const ensureDataExists = () => {
+    try {
+        if (!fs.existsSync(dataDir)) {
+            fs.mkdirSync(dataDir, { recursive: true });
+        }
+        if (!fs.existsSync(dataFile)) {
+            fs.writeFileSync(dataFile, JSON.stringify([]), 'utf8');
+        }
+    } catch (err) {
+        console.error("Error ensuring data storage exists:", err);
+    }
+};
+
+// Run once on load
+ensureDataExists();
 
 // Simple in-memory cache for analysis results (5 mins)
 const analysisCache = new Map();
