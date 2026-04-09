@@ -17,6 +17,13 @@ const getAnalysisWithCache = async (symbol) => {
     }
     try {
         const analysis = await analysisService.analyzeSecurity(symbol);
+        const details = await nepseService.getSecurityDetails(symbol);
+        
+        // Enrich analysis with latest traded price from company details
+        if (details && details.securityDailyTradeDto) {
+            analysis.lastPrice = details.securityDailyTradeDto.lastTradedPrice || details.securityDailyTradeDto.closePrice || analysis.lastPrice;
+        }
+        
         analysisCache.set(symbol, { data: analysis, timestamp: Date.now() });
         return analysis;
     } catch (e) {
@@ -39,13 +46,15 @@ const getPortfolio = async () => {
         }
         
         const enrichedData = await Promise.all(data.map(async (item) => {
-            const currentPrice = priceMap[item.symbol] || item.buyPrice;
+            const analysis = await getAnalysisWithCache(item.symbol);
+            
+            // Use analysis.lastPrice as currentPrice, fallback to live market or buyPrice
+            const currentPrice = analysis ? analysis.lastPrice : (priceMap[item.symbol] || item.buyPrice);
+            
             const totalInvestment = Number(item.quantity) * Number(item.buyPrice);
             const currentValue = Number(item.quantity) * currentPrice;
             const profitLoss = currentValue - totalInvestment;
             const percentReturn = totalInvestment > 0 ? (profitLoss / totalInvestment) * 100 : 0;
-            
-            const analysis = await getAnalysisWithCache(item.symbol);
             
             return {
                 ...item,
