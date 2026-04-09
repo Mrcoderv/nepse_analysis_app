@@ -6,6 +6,14 @@ const analysisService = require('./analysisService');
 const dataDir = path.join(__dirname, '../data');
 const dataFile = path.join(dataDir, 'portfolio.json');
 
+// Bootstrapping storage directory and file
+if (!fs.existsSync(dataDir)) {
+    fs.mkdirSync(dataDir, { recursive: true });
+}
+if (!fs.existsSync(dataFile)) {
+    fs.writeFileSync(dataFile, JSON.stringify([]));
+}
+
 // Simple in-memory cache for analysis results (5 mins)
 const analysisCache = new Map();
 const CACHE_TTL = 5 * 60 * 1000; 
