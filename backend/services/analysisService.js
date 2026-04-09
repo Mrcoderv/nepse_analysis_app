@@ -2,11 +2,16 @@ const { MACD, RSI, SMA, EMA, BollingerBands, Stochastic, ATR, ADX, CCI, Williams
 const nepseService = require('./nepseService');
 
 const analyzeSecurity = async (symbol) => {
-    const historyData = await nepseService.getSecurityPriceVolumeHistory(symbol);
+    const [historyData, details] = await Promise.all([
+        nepseService.getSecurityPriceVolumeHistory(symbol),
+        nepseService.getSecurityDetails(symbol)
+    ]);
+
     if (!historyData || !historyData.content || historyData.content.length === 0) {
         throw new Error('No historical timeline found for symbol');
     }
     
+    const companyName = details?.security?.securityName || symbol;
     // Sort and validate data
     const items = historyData.content
         .filter(item => typeof item.closePrice === 'number' && item.businessDate)
@@ -190,6 +195,7 @@ const analyzeSecurity = async (symbol) => {
     else if (score <= 35) { recommendation = 'sell';        action = 'SELL'; }
 
     return {
+        companyName,
         efficiency_score: score,
         signal_level: action,
         recommendation,

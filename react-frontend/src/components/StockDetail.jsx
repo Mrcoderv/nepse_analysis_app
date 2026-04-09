@@ -11,6 +11,19 @@ const StockDetail = () => {
   const [aiResult, setAiResult] = useState(null);
   const [loading, setLoading] = useState(true);
   const [aiLoading, setAiLoading] = useState(false);
+  const [dots, setDots] = useState('');
+
+  useEffect(() => {
+    let interval;
+    if (aiLoading) {
+      interval = setInterval(() => {
+        setDots(prev => prev.length >= 4 ? '.' : prev + '.');
+      }, 400);
+    } else {
+      setDots('');
+    }
+    return () => clearInterval(interval);
+  }, [aiLoading]);
 
   const lastPrice = analysis?.lastPrice || 0; // Ensure lastPrice is scoped correctly
 
@@ -64,17 +77,20 @@ const StockDetail = () => {
       {/* Header Info */}
       <div className="flex flex-col md:flex-row md:items-end justify-between border-b border-neutral-800 pb-6 gap-4">
         <div>
-          <div className="flex items-center space-x-3 mb-2">
-            <span className="px-3 py-1 bg-blue-600 text-white text-sm font-bold rounded-lg shadow-lg shadow-blue-600/20">{symbol}</span>
-            <h2 className="text-3xl font-bold text-neutral-100 italic">{analysis?.lastPrice && `Rs. ${analysis.lastPrice}`}</h2>
-            <div className={`ml-4 px-4 py-1.5 rounded-xl border-2 font-black tracking-tighter text-sm ${
-              analysis?.recommendation === 'strong_buy' ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/30' :
-              analysis?.recommendation === 'buy' ? 'bg-emerald-500/5 text-emerald-500 border-emerald-500/20' :
-              analysis?.recommendation === 'strong_sell' ? 'bg-red-500/10 text-red-400 border-red-500/30' :
-              analysis?.recommendation === 'sell' ? 'bg-red-500/5 text-red-500 border-red-500/20' :
-              'bg-amber-500/10 text-amber-400 border-amber-500/30'
-            }`}>
-              {analysis?.signal_level || 'HOLD'}
+          <div className="flex flex-col mb-2">
+            <h1 className="text-xl font-bold text-neutral-400 mb-1">{analysis?.companyName || '\u00A0'}</h1>
+            <div className="flex items-center space-x-3">
+              <span className="px-3 py-1 bg-blue-600 text-white text-sm font-bold rounded-lg shadow-lg shadow-blue-600/20">{symbol}</span>
+              <h2 className="text-3xl font-bold text-neutral-100 italic">{analysis?.lastPrice && `Rs. ${analysis.lastPrice}`}</h2>
+              <div className={`ml-4 px-4 py-1.5 rounded-xl border-2 font-black tracking-tighter text-sm ${
+                analysis?.recommendation === 'strong_buy' ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/30' :
+                analysis?.recommendation === 'buy' ? 'bg-emerald-500/5 text-emerald-500 border-emerald-500/20' :
+                analysis?.recommendation === 'strong_sell' ? 'bg-red-500/10 text-red-400 border-red-500/30' :
+                analysis?.recommendation === 'sell' ? 'bg-red-500/5 text-red-500 border-red-500/20' :
+                'bg-amber-500/10 text-amber-400 border-amber-500/30'
+              }`}>
+                {analysis?.signal_level || 'HOLD'}
+              </div>
             </div>
           </div>
           <div className="flex items-center space-x-4 text-sm mt-3">
@@ -90,10 +106,18 @@ const StockDetail = () => {
         <button 
           onClick={handleAIAnalysis}
           disabled={aiLoading}
-          className={`flex items-center px-6 py-3 bg-gradient-to-r from-violet-600 to-indigo-600 hover:from-violet-500 hover:to-indigo-500 text-white font-bold rounded-2xl transition-all shadow-xl shadow-violet-600/20 group ${aiLoading ? 'opacity-50 cursor-not-allowed' : ''}`}
+          className={`flex items-center px-6 py-3 bg-neutral-800 hover:bg-neutral-700 text-white font-bold rounded-2xl transition-all shadow-lg border border-neutral-700 min-w-[180px] justify-center ${aiLoading ? 'opacity-50 cursor-not-allowed' : ''}`}
         >
-          <Brain className={`mr-2 group-hover:scale-110 transition-transform ${aiLoading ? 'animate-pulse' : ''}`} size={20} />
-          {aiLoading ? 'Gemini Thinking...' : 'Ask AI Insight'}
+          {aiLoading ? (
+            <span className="flex items-center font-mono">
+              Analyzing <span className="w-8 text-left inline-block">{dots}</span>
+            </span>
+          ) : (
+            <>
+              <Target className="mr-2 text-neutral-400" size={20} />
+              Generate Analysis
+            </>
+          )}
         </button>
       </div>
 
@@ -148,43 +172,33 @@ const StockDetail = () => {
             </div>
           </div>
 
-          {/* AI Result Area */}
+          {/* Analysis View */}
           {aiResult && (
-            <div className="p-8 bg-neutral-900 border border-violet-500/30 rounded-3xl shadow-2xl relative overflow-hidden animate-in zoom-in-95 duration-500">
-               <div className="absolute top-0 right-0 p-4 opacity-5">
-                  <Brain size={120} />
-               </div>
+            <div className="p-8 bg-neutral-900 border border-neutral-700 rounded-3xl shadow-2xl relative overflow-hidden animate-in zoom-in-95 duration-500">
                <div className="relative z-10">
                  <div className="flex items-center space-x-3 mb-6">
-                    <div className="p-2 bg-violet-500/10 text-violet-400 rounded-xl border border-violet-500/20">
+                    <div className="p-2 bg-neutral-800 text-neutral-400 rounded-xl border border-neutral-700">
                        <Target size={24} />
                     </div>
-                    <h3 className="text-xl font-bold bg-gradient-to-r from-violet-400 to-indigo-400 bg-clip-text text-transparent">Gemini AI Recommendation</h3>
+                    <h3 className="text-xl font-bold text-neutral-100">Smart Analysis Recommendation</h3>
                  </div>
                  
-                 <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
+                 <div className="space-y-8 mb-4">
                     <div>
-                        <p className="text-xs font-bold text-neutral-500 uppercase tracking-widest mb-2">RECOMMENDATION</p>
-                        <span className={`text-2xl font-black px-4 py-2 rounded-xl border-2 ${
-                            aiResult.recommendation?.toUpperCase() === 'BUY' ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/30' :
-                            aiResult.recommendation?.toUpperCase() === 'SELL' ? 'bg-red-500/10 text-red-400 border-red-500/30' :
-                            'bg-amber-500/10 text-amber-400 border-amber-500/30'
-                        }`}>
-                            {aiResult.recommendation}
-                        </span>
+                        <p className="text-xs font-black text-neutral-500 uppercase tracking-widest mb-2">RECOMMENDATION</p>
+                        <p className="text-sm text-neutral-300 leading-relaxed font-medium">
+                           <strong className={`uppercase ${
+                              aiResult.recommendation?.toUpperCase() === 'BUY' ? 'text-emerald-400' :
+                              aiResult.recommendation?.toUpperCase() === 'SELL' ? 'text-red-400' :
+                              'text-amber-400'
+                           }`}>{aiResult.recommendation}.</strong> {aiResult.reason}
+                        </p>
                     </div>
                     <div>
-                        <p className="text-xs font-bold text-neutral-500 uppercase tracking-widest mb-2">RISK LEVEL</p>
-                        <span className="text-lg font-bold text-neutral-100">{aiResult.risk}</span>
-                    </div>
-                 </div>
-
-                 <div className="space-y-4">
-                    <div className="p-4 bg-neutral-950/50 rounded-2xl border border-neutral-800">
-                        <p className="text-sm text-neutral-400 leading-relaxed"><span className="text-neutral-100 font-bold block mb-2 uppercase text-xs tracking-tighter">Analysis Brief</span> {aiResult.reason}</p>
-                    </div>
-                    <div className="p-4 bg-neutral-950/50 rounded-2xl border border-neutral-800">
-                        <p className="text-sm text-neutral-400 leading-relaxed"><span className="text-neutral-100 font-bold block mb-2 uppercase text-xs tracking-tighter">Outlook</span> {aiResult.outlook}</p>
+                        <p className="text-xs font-black text-neutral-500 uppercase tracking-widest mb-2">RISK LEVEL</p>
+                        <p className="text-sm text-neutral-300 leading-relaxed font-medium">
+                           <strong className="text-neutral-100 uppercase">{aiResult.risk}:</strong> {aiResult.outlook}
+                        </p>
                     </div>
                  </div>
                </div>
